@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>央小频AI助手</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
+        }
+        
+        body {
+            background-color: #f5f5f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .chat-container {
+            width: 100%;
+            max-width: 500px;
+            height: 90vh;
+            background-color: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        /* 顶部导航栏 */
+        .header {
+            background-color: #d32f2f;
+            color: white;
+            padding: 12px 20px;
+            position: relative;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .header-content {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .header .logo {
+            width: 36px;
+            height: 36px;
+            background-color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        
+        .header .logo i {
+            font-size: 20px;
+            color: #d32f2f;
+        }
+        
+        .header h1 {
+            font-size: 20px;
+            font-weight: 600;
+            letter-spacing: 1px;
+        }
+        
+        /* 聊天内容区域 */
+        .chat-content {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            background-color: #fafafa;
+        }
+        
+        /* 聊天消息样式 */
+        .message {
+            max-width: 85%;
+            padding: 14px 16px;
+            margin-bottom: 16px;
+            border-radius: 18px;
+            position: relative;
+            animation: fadeIn 0.3s ease-out;
+            word-break: break-word;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+        }
+        
+        .ai-message {
+            align-self: flex-start;
+            background-color: #ffebee;
+            color: #333;
+            border-bottom-left-radius: 4px;
+            line-height: 1.6;
+            border: 1px solid rgba(0,0,0,0.03);
+        }
+        
+        .user-message {
+            align-self: flex-end;
+            background-color: #e3f2fd;
+            color: #1565c0;
+            border-bottom-right-radius: 4px;
+        }
+        
+        /* 信息列表样式 */
+        .news-list {
+            padding-top: 8px;
+        }
+        
+        .news-item {
+            padding: 10px 0;
+            margin: 8px 0;
+            border-bottom: 1px dashed rgba(0,0,0,0.1);
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+            padding-left: 24px;
+            color: #333;
+            border-radius: 8px;
+        }
+        
+        .news-item:before {
+            content: "•";
+            position: absolute;
+            left: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #d32f2f;
+            font-size: 20px;
+        }
+        
+        .news-item:last-child {
+            border-bottom: none;
+        }
+        
+        .news-item:hover {
+            background-color: rgba(211, 47, 47, 0.05);
+            padding-left: 28px;
+            font-weight: 500;
+            color: #d32f2f;
+        }
+        
+        /* 详情区域样式 */
+        .detail-container {
+            margin-top: 12px;
+        }
+        
+        .thinking-notice {
+            background-color: rgba(211, 47, 47, 0.08);
+            padding: 10px 14px;
+            font-size: 14px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            color: #d32f2f;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+        }
+        
+        .thinking-notice i {
+            margin-right: 8px;
+            animation: spin 1.5s linear infinite;
+        }
+        
+        .detail-section {
+            margin-bottom: 16px;
+        }
+        
+        .detail-section h3 {
+            font-size: 16px;
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: #333;
+            position: relative;
+            padding-left: 16px;
+        }
+        
+        .detail-section h3:before {
+            content: "";
+            position: absolute;
+            left: 0;
+            top: 10px;
+            width: 8px;
+            height: 8px;
+            background-color: #d32f2f;
+            border-radius: 50%;
+        }
+        
+        .detail-list {
+            list-style-type: none;
+            padding-left: 16px;
+        }
+        
+        .detail-list li {
+            margin-bottom: 8px;
+            position: relative;
+            padding-left: 20px;
+            color: #333;
+            font-size: 15px;
+            line-height: 1.5;
+        }
+        
+        .detail-list li:before {
+            content: "•";
+            position: absolute;
+            left: 8px;
+            color: #d32f2f;
+            font-size: 20px;
+        }
+        
+        /* 视频推荐区域 */
+        .recommend-section {
+            margin-top: 20px;
+            padding-top: 18px;
+            border-top: 1px dashed rgba(211, 47, 47, 0.2);
+        }
+        
+        .recommend-section h4 {
+            font-size: 17px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            position: relative;
+            padding-left: 28px;
+            color: #d32f2f;
+        }
+        
+        .recommend-section h4:before {
+            content: "";
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 20px;
+            height: 20px;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23d32f2f"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"></path></svg>');
+            background-repeat: no-repeat;
+        }
+        
+        .video-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 14px;
+        }
+        
+        .video-card {
+            aspect-ratio: 16/9;
+            background: linear-gradient(135deg, #e53935, #b71c1c);
+            border-radius: 8px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+            animation: cardAppear 0.5s ease-out;
+            transition: all 0.3s;
+        }
+        
+        .video-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .video-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 100%);
+            padding: 10px;
+            color: white;
+            font-size: 13px;
+            font-weight: 500;
+        }
+        
+        .play-icon {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 36px;
+            height: 36px;
+            background-color: rgba(255, 255, 255, 0.25);
+            backdrop-filter: blur(4px);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0.9;
+            transition: all 0.3s;
+        }
+        
+        .video-card:hover .play-icon {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1.1);
+            background-color: rgba(255, 255, 255, 0.35);
+        }
+        
+        .play-icon i {
+            color: white;
+            font-size: 14px;
+            margin-left: 2px;
+        }
+        
+        /* 底部控制区域 */
+        .bottom-controls {
+            background-color: white;
+            padding: 16px 20px;
+            border-top: 1px solid #eeeeee;
+            box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.03);
+            z-index: 10;
+        }
+        
+        .slider-container {
+            display: flex;
+            background-color: #f5f5f5;
+            border-radius: 24px;
+            overflow: hidden;
+            margin-bottom: 16px;
+            box-shadow: inset 0 1px 4px rgba(0, 0, 0, 0.08);
+        }
+        
+        .slider-item {
+            flex: 1;
+            text-align: center;
+            padding: 12px;
+            font-size: 14px;
+            color: #616161;
+            transition: all 0.3s;
+            cursor: pointer;
+            position: relative;
+            font-weight: 500;
+        }
+        
+        .slider-item:not(:last-child):after {
+            content: "";
+            position: absolute;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            height: 60%;
+            width: 1px;
+            background-color: #e0e0e0;
+        }
+        
+        .slider-item.active {
+            background-color: #d32f2f;
+            color: white;
+            font-weight: 500;
+        }
+        
+        .input-container {
+            display: flex;
+            background-color: #f5f5f5;
+            border-radius: 24px;
+            overflow: hidden;
+            align-items: center;
+            padding: 0 15px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.05) inset;
+        }
+        
+        .input-container input {
+            flex: 1;
+            border: none;
+            background: transparent;
+            padding: 14px 0;
+            font-size: 15px;
+            outline: none;
+            color: #333;
+        }
+        
+        .input-container button {
+            background: none;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            color: #757575;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+        
+        .input-container button:hover {
+            background-color: rgba(211, 47, 47, 0.15);
+            color: #d32f2f;
+        }
+        
+        /* 动画效果 */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes cardAppear {
+            from { opacity: 0; transform: scale(0.8); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* 响应式调整 */
+        @media (max-width: 480px) {
+            .chat-container {
+                height: 95vh;
+            }
+            
+            .chat-content {
+                padding: 15px;
+            }
+            
+            .message {
+                max-width: 90%;
+                padding: 12px 14px;
+            }
+            
+            .header {
+                padding: 10px 15px;
+            }
+            
+            .header h1 {
+                font-size: 18px;
+            }
+            
+            .slider-item {
+                padding: 10px;
+                font-size: 13px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="header">
+            <div class="header-content">
+                <div class="logo">
+                    <i class="fas fa-robot"></i>
+                </div>
+                <h1>央小频</h1>
+            </div>
+        </div>
+        
+        <div class="chat-content" id="chatContent">
+            <!-- 只有初始自我介绍 -->
+            <div class="message ai-message">
+                嗨你好，我是央小频！作为央视频的官方AI助手，我可以带给你全场景陪伴式的智能服务。快点击下方滑块，体验我的不同功能吧～
+            </div>
+        </div>
+        
+        <div class="bottom-controls">
+            <div class="slider-container">
+                <div class="slider-item">栏目推荐</div>
+                <div class="slider-item">热点速递</div>
+                <div class="slider-item">新闻联播</div>
+            </div>
+            <div class="input-container">
+                <input type="text" placeholder="输入你想了解的内容...">
+                <button id="sendButton"><i class="fas fa-paper-plane"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 跟踪当前加载状态
+        let isLoading = false;
+        let loadingMessage = null;
+        
+        // 滚动到聊天底部
+        function scrollToBottom() {
+            const chatContent = document.getElementById('chatContent');
+            chatContent.scrollTop = chatContent.scrollHeight;
+        }
+        
+        // 创建加载状态消息
+        function createLoadingMessage() {
+            // 移除之前的加载消息
+            if (loadingMessage) {
+                loadingMessage.remove();
+            }
+            
+            loadingMessage = document.createElement('div');
+            loadingMessage.className = 'message ai-message';
+            loadingMessage.innerHTML = `
+                <div class="thinking-notice">
+                    <i class="fas fa-cog"></i>深度思考中...
+                </div>
+            `;
+            document.getElementById('chatContent').appendChild(loadingMessage);
+            scrollToBottom();
+            
+            return loadingMessage;
+        }
+        
+        // 热点新闻项目点击事件
+        function setupNewsItems() {
+            document.querySelectorAll('.news-item').forEach(item => {
+                item.addEventListener('click', function() {
+                    if (isLoading) return;
+                    
+                    const newsText = this.textContent;
+                    
+                    // 添加用户选择的消息
+                    const userMessage = document.createElement('div');
+                    userMessage.className = 'message user-message';
+                    userMessage.textContent = newsText;
+                    document.getElementById('chatContent').appendChild(userMessage);
+                    
+                    // 添加加载状态
+                    const loadingElement = createLoadingMessage();
+                    isLoading = true;
+                    
+                    scrollToBottom();
+                    
+                    // 模拟加载时间后显示内容
+                    setTimeout(() => {
+                        loadingElement.remove();
+                        
+                        const aiMessage = document.createElement('div');
+                        aiMessage.className = 'message ai-message';
+                        
+                        // 只有在热点速递-美国袭击伊朗核设施时显示详细内容
+                        if (newsText === '美国袭击伊朗核设施') {
+                            aiMessage.innerHTML = `
+                                <div class="thinking-notice">
+                                    <i class="fas fa-cog"></i> 深度思考完毕，根据央视频权威资源库为您回答
+                                </div>
+                                
+                                <div class="detail-container">
+                                    <div class="detail-section">
+                                        <h3>袭击目标与时间</h3>
+                                        <ul class="detail-list">
+                                            <li>三处核设施：福尔多（Fordow）、纳坦兹（Natanz）和伊斯法罕（Isfahan）核设施。</li>
+                                            <li>时间：2025年6月21日至22日（美军行动时间线），特朗普于当地时间21日晚正式宣布。</li>
+                                        </ul>
+                                    </div>
+                                    
+                                    <div class="detail-section">
+                                        <h3>军事手段</h3>
+                                        <ul class="detail-list">
+                                            <li>武器类型：B-2轰炸机投掷14枚GBU-57钻地弹（针对地下设施如福尔多）；逾20枚战斧导弹（打击伊斯法罕核设施）。</li>
+                                            <li>破坏情况：卫星图像显示福尔多地上设施受损，山腰颜色变化；伊斯法罕设施被导弹攻击；纳坦兹核设施遭受重大破坏。</li>
+                                        </ul>
+                                    </div>
+                                    
+                                    <div class="detail-section">
+                                        <h3>美方声明</h3>
+                                        <ul class="detail-list">
+                                            <li>特朗普称"关键核设施被完全摧毁"，强调袭击有效迫使伊朗重返谈判。</li>
+                                            <li>白宫官员声称打击"精准且有效"，目标是伊朗离心机生产力和铀浓缩能力。</li>
+                                        </ul>
+                                    </div>
+                                    
+                                    <div class="detail-section">
+                                        <h3>伊朗回应</h3>
+                                        <ul class="detail-list">
+                                            <li>外交部指责美国违反《联合国宪章》和国际法，保留自卫权。</li>
+                                            <li>国际原子能机构监测未发现核泄漏，但设施受损程度需进一步评估。</li>
+                                        </ul>
+                                    </div>
+                                    
+                                    <div class="detail-section">
+                                        <h3>国际反应</h3>
+                                        <ul class="detail-list">
+                                            <li>法国、巴西等多国批评美国加剧地区紧张局势，呼吁和平解决危机。</li>
+                                        </ul>
+                                    </div>
+                                    
+                                    <div class="recommend-section">
+                                        <h4>央小频推荐观看</h4>
+                                        <div class="video-grid">
+                                            <div class="video-card">
+                                                <div class="play-icon">
+                                                    <i class="fas fa-play"></i>
+                                                </div>
+                                                <div class="video-overlay">美军打击伊朗核设施全过程</div>
+                                            </div>
+                                            <div class="video-card">
+                                                <div class="play-icon">
+                                                    <i class="fas fa-play"></i>
+                                                </div>
+                                                <div class="video-overlay">特朗普宣布打击行动</div>
+                                            </div>
+                                            <div class="video-card">
+                                                <div class="play-icon">
+                                                    <i class="fas fa-play"></i>
+                                                </div>
+                                                <div class="video-overlay">国际原子能机构评估报告</div>
+                                            </div>
+                                            <div class="video-card">
+                                                <div class="play-icon">
+                                                    <i class="fas fa-play"></i>
+                                                </div>
+                                                <div class="video-overlay">伊朗军方强硬回应</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                        } else {
+                            // 其他新闻项只显示推荐视频
+                            aiMessage.innerHTML = `
+                                <div class="thinking-notice">
+                                    <i class="fas fa-cog"></i> 已为您找到关于 ${newsText} 的最新报道
+                                </div>
+                                
+                                <div class="recommend-section">
+                                    <h4>央小频推荐观看</h4>
+                                    <div class="video-grid">
+                                        <div class="video-card">
+                                            <div class="play-icon">
+                                                <i class="fas fa-play"></i>
+                                            </div>
+                                            <div class="video-overlay">${newsText}深度报道</div>
+                                        </div>
+                                        <div class="video-card">
+                                            <div class="play-icon">
+                                                <i class="fas fa-play"></i>
+                                            </div>
+                                            <div class="video-overlay">${newsText}最新进展</div>
+                                        </div>
+                                        <div class="video-card">
+                                            <div class="play-icon">
+                                                <i class="fas fa-play"></i>
+                                            </div>
+                                            <div class="video-overlay">专家解读${newsText}</div>
+                                        </div>
+                                        <div class="video-card">
+                                            <div class="play-icon">
+                                                <i class="fas fa-play"></i>
+                                            </div>
+                                            <div class="video-overlay">${newsText}专题分析</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                        }
+                        
+                        document.getElementById('chatContent').appendChild(aiMessage);
+                        scrollToBottom();
+                        isLoading = false;
+                        loadingMessage = null;
+                    }, 2000);
+                });
+            });
+        }
+        
+        // 页面加载后滚动到底部
+        window.addEventListener('load', scrollToBottom);
+        
+        // 底部滑块点击事件
+        document.querySelectorAll('.slider-item').forEach(item => {
+            item.addEventListener('click', function() {
+                if (isLoading) return;
+                
+                document.querySelectorAll('.slider-item').forEach(i => {
+                    i.classList.remove('active');
+                });
+                this.classList.add('active');
+                
+                const sliderText = this.textContent;
+                
+                // 添加用户选择的消息
+                const userMessage = document.createElement('div');
+                userMessage.className = 'message user-message';
+                userMessage.textContent = sliderText;
+                document.getElementById('chatContent').appendChild(userMessage);
+                
+                // 添加加载状态
+                const loadingElement = createLoadingMessage();
+                isLoading = true;
+                
+                scrollToBottom();
+                
+                // 模拟AI响应
+                setTimeout(() => {
+                    loadingElement.remove();
+                    
+                    const aiMessage = document.createElement('div');
+                    aiMessage.className = 'message ai-message';
+                    
+                    if (sliderText === '栏目推荐') {
+                        aiMessage.innerHTML = `
+                            已根据您的兴趣为您推荐以下栏目：
+                            <div class="news-list">
+                                <div class="news-item">新闻直播间</div>
+                                <div class="news-item">文化中国</div>
+                                <div class="news-item">体育赛事直播</div>
+                                <div class="news-item">财经观察</div>
+                                <div class="news-item">纪录片精选</div>
+                            </div>
+                        `;
+                    } else if (sliderText === '新闻联播') {
+                        aiMessage.innerHTML = `
+                            <div class="detail-container">
+                                <div class="detail-section">
+                                    <h3>今日新闻联播主要内容：</h3>
+                                    <ul class="detail-list">
+                                        <li>中央领导人主持重要会议，部署下半年经济工作</li>
+                                        <li>全国防汛抗旱工作进入关键时期</li>
+                                        <li>"一带一路"建设取得新成果，国际合作持续深化</li>
+                                        <li>科技攻关再传捷报，多项核心技术取得突破</li>
+                                        <li>夏季旅游市场升温，文化旅游消费持续复苏</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        `;
+                    } else {
+                        aiMessage.innerHTML = `
+                            以下为今日最热资讯：
+                            <div class="news-list">
+                                <div class="news-item">美国袭击伊朗核设施</div>
+                                <div class="news-item">雷霆队夺得NBA总冠军</div>
+                                <div class="news-item">抗战胜利80周年活动发布会明天举行</div>
+                                <div class="news-item">全国各地高考陆续开始查分</div>
+                                <div class="news-item">二号台风圣帕或近期生成</div>
+                            </div>
+                        `;
+                    }
+                    
+                    document.getElementById('chatContent').appendChild(aiMessage);
+                    scrollToBottom();
+                    
+                    // 重新设置新闻项的点击事件
+                    setupNewsItems();
+                    isLoading = false;
+                    loadingMessage = null;
+                }, 1200);
+            });
+        });
+        
+        // 发送按钮点击事件
+        document.getElementById('sendButton').addEventListener('click', function() {
+            if (isLoading) return;
+            
+            const input = document.querySelector('.input-container input');
+            if (input.value.trim() !== '') {
+                const userMessage = document.createElement('div');
+                userMessage.className = 'message user-message';
+                userMessage.textContent = input.value;
+                document.getElementById('chatContent').appendChild(userMessage);
+                
+                input.value = '';
+                scrollToBottom();
+                
+                // 添加加载状态
+                const loadingElement = createLoadingMessage();
+                isLoading = true;
+                
+                // 模拟AI思考
+                setTimeout(() => {
+                    loadingElement.remove();
+                    
+                    const aiMessage = document.createElement('div');
+                    aiMessage.className = 'message ai-message';
+                    aiMessage.textContent = "感谢您的咨询！我已记录您的问题，会尽快为您提供相关内容。您也可以尝试点击下方的功能选项进行更深入的探索～";
+                    document.getElementById('chatContent').appendChild(aiMessage);
+                    scrollToBottom();
+                    isLoading = false;
+                    loadingMessage = null;
+                }, 1500);
+            }
+        });
+        
+        // 设置初始状态
+        window.addEventListener('load', function() {
+            scrollToBottom();
+        });
+    </script>
+</body>
+</html>
